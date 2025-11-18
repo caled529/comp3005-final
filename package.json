@@ -1,0 +1,24 @@
+{
+  "name": "comp3005-final",
+  "version": "1.0.0",
+  "description": "Health and fitness club management system for COMP3005",
+  "homepage": "https://github.com/caled529/comp3005-final#readme",
+  "bugs": {
+    "url": "https://github.com/caled529/comp3005-final/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caled529/comp3005-final.git"
+  },
+  "license": "BSD-3",
+  "author": "Ramona Caprariu, Cale Dillon, Olutomi Sami",
+  "type": "module",
+  "scripts": {},
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "prisma": "^6.19.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-language-server": "^5.1.2"
+  }
+}

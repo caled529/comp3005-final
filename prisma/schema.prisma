@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Availability {
+  id        Int       @id @default(autoincrement())
+  trainer   Trainer   @relation(fields: [trainerId], references: [userId])
+  trainerId Int
+  day       Weekday
+  startTime DateTime  @db.Time(6)
+  endTime   DateTime  @db.Time(6)
+  date      DateTime? @db.Date
+}
+
+model ClassRegistration {
+  class    ScheduledClass @relation(fields: [classId], references: [id])
+  classId  Int
+  member   Member         @relation(fields: [memberId], references: [userId])
+  memberId Int
+  attended Boolean        @default(false)
+
+  @@id([classId, memberId])
+}
+
+model ClassType {
+  id      Int              @id @default(autoincrement())
+  name    String
+  classes ScheduledClass[]
+}
+
+model Goal {
+  id        Int      @id @default(autoincrement())
+  activeFor Member?  @relation("MemberActiveGoal")
+  member    Member   @relation("MemberGoals", fields: [memberId], references: [userId])
+  memberId  Int
+  type      GoalType
+  target    Float    @db.Real
+  created   DateTime @default(now()) @db.Timestamp(6)
+}
+
+model GymUser {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String
+  role    Roles    @default(member)
+  member  Member?
+  trainer Trainer?
+}
+
+model Member {
+  user         GymUser             @relation(fields: [userId], references: [id])
+  userId       Int                 @id
+  birthdate    DateTime            @db.Date
+  gender       Gender
+  phone        String
+  activeGoal   Goal?               @relation("MemberActiveGoal", fields: [activeGoalId], references: [id])
+  activeGoalId Int?                @unique
+  classes      ClassRegistration[]
+  goals        Goal[]              @relation("MemberGoals")
+  metrics      Metric[]
+  sessions     PersonalSession[]
+}
+
+model Metric {
+  member    Member   @relation(fields: [memberId], references: [userId])
+  memberId  Int
+  recorded  DateTime @default(now()) @db.Timestamp(6)
+  height    Float    @db.Real
+  weight    Float    @db.Real
+  heartrate Int      @db.SmallInt
+  bodyfat   Float    @db.Real
+
+  @@id([memberId, recorded])
+}
+
+model PersonalSession {
+  id        Int      @id @default(autoincrement())
+  room      Room     @relation(fields: [roomId], references: [id])
+  roomId    Int
+  trainer   Trainer  @relation(fields: [trainerId], references: [userId])
+  trainerId Int
+  member    Member   @relation(fields: [memberId], references: [userId])
+  memberId  Int
+  startTime DateTime @db.Timestamp(6)
+  endTime   DateTime @db.Timestamp(6)
+}
+
+model Room {
+  id               Int               @id @default(autoincrement())
+  capacity         Int
+  allows           BookingType       @default(all)
+  personalSessions PersonalSession[]
+  scheduledClasses ScheduledClass[]
+}
+
+model ScheduledClass {
+  id            Int                 @id @default(autoincrement())
+  type          ClassType           @relation(fields: [typeId], references: [id])
+  typeId        Int
+  roomId        Int
+  trainerId     Int
+  startTime     DateTime            @db.Timestamp(6)
+  endTime       DateTime            @db.Timestamp(6)
+  registrations ClassRegistration[]
+  room          Room                @relation(fields: [roomId], references: [id])
+  trainer       Trainer             @relation(fields: [trainerId], references: [userId])
+}
+
+model Trainer {
+  user         GymUser           @relation(fields: [userId], references: [id])
+  userId       Int               @id
+  availability Availability[]
+  sessions     PersonalSession[]
+  classes      ScheduledClass[]
+}
+
+enum BookingType {
+  all
+  group
+  personal
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum GoalType {
+  weight
+  bodyFat
+}
+
+enum Roles {
+  admin
+  member
+  trainer
+}
+
+enum Weekday {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}

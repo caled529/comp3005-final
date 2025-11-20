@@ -47,7 +47,7 @@ model GymUser {
   id      Int      @id @default(autoincrement())
   email   String   @unique
   name    String
-  role    Roles    @default(member)
+  role    Role     @default(member)
   member  Member?
   trainer Trainer?
 }
@@ -136,7 +136,7 @@ enum GoalType {
   bodyFat
 }
 
-enum Roles {
+enum Role {
   admin
   member
   trainer

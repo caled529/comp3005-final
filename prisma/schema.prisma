@@ -43,7 +43,7 @@ model Goal {
   created   DateTime @default(now()) @db.Timestamp(6)
 }
 
-model GymUser {
+model User {
   id      Int      @id @default(autoincrement())
   email   String   @unique
   name    String
@@ -53,7 +53,7 @@ model GymUser {
 }
 
 model Member {
-  user         GymUser             @relation(fields: [userId], references: [id])
+  user         User                @relation(fields: [userId], references: [id])
   userId       Int                 @id
   birthdate    DateTime            @db.Date
   gender       Gender
@@ -112,7 +112,7 @@ model ScheduledClass {
 }
 
 model Trainer {
-  user         GymUser           @relation(fields: [userId], references: [id])
+  user         User              @relation(fields: [userId], references: [id])
   userId       Int               @id
   availability Availability[]
   sessions     PersonalSession[]

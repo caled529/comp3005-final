@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 const UniqueEmail = z.email().refine(
   async (email) => {
-    const match = await prisma.gymUser.findUnique({
+    const match = await prisma.user.findUnique({
       where: { email: email },
     });
     return match === null;
@@ -49,7 +49,7 @@ app.post("/register", async (req, res) => {
     return;
   }
   try {
-    await prisma.gymUser.create({
+    await prisma.user.create({
       data: {
         email: result.data.email,
         name: result.data.name,

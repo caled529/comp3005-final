@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { type Express } from "express";
 import z from "zod";
 
-const setup = (app: Express, prisma: PrismaClient) => {
+export const setup = (app: Express, prisma: PrismaClient) => {
 	const UniqueEmail = z.email().refine(
 		async (email) => {
 			const match = await prisma.user.findUnique({
@@ -71,7 +71,3 @@ const setup = (app: Express, prisma: PrismaClient) => {
 		}
 	});
 }
-
-export default {
-	setup
-};

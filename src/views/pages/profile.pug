@@ -1,0 +1,29 @@
+html
+	head
+		title Gym Member Profile
+body
+	include ../partials/header
+
+	div#main
+		h1 Profile Management
+		br
+		h3 Personal details
+        h4 Name:
+        input(type="text", id="name")
+        h4 Date of birth:
+        input(type="date", id="dob")
+        h4 Gender: 
+        input(type="text", id="gender")
+        h4 Email: 
+        input(type="text", id="email")
+        h4 Address: 
+        input(type="text", id="address")
+        br
+        button(type="button", id="save") Save changes
+        script(src="/profile.ts")
+        br
+        h3 Fitness Goals
+
+
+        
+			

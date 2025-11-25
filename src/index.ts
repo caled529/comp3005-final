@@ -7,6 +7,9 @@ app.use(express.json());
 
 const prisma = new PrismaClient();
 
+app.set('view engine', 'pug');
+app.use(express.static("public"));
+
 const UniqueEmail = z.email().refine(
   async (email) => {
     const match = await prisma.user.findUnique({

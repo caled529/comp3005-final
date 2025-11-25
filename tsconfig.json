@@ -1,5 +1,5 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
+  // Visit t to read more about this file
   "compilerOptions": {
     // File Layout
     "rootDir": "./src",
@@ -10,7 +10,7 @@
     "module": "nodenext",
     "target": "esnext",
     // For nodejs:
-    "lib": ["esnext"],
+    "lib": ["esnext", "DOM"],
     "types": ["node"],
 
     // Other Outputs

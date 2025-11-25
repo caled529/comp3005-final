@@ -1,7 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
 
-export const authenticate = (prisma: PrismaClient) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
+export enum AuthLevel {
+	admin = "admin",
+	member = "member",
+	trainer = "trainer",
+};
+
+export const authenticate = (
+	prisma: PrismaClient,
+	level: AuthLevel = AuthLevel.member,
+) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
 	const failure = (): any => {
 		res.setHeader("WWW-Authenticate", 'Basic realm="Gym System"');
 		let err: any = new Error("Not authenticated");
@@ -20,8 +29,26 @@ export const authenticate = (prisma: PrismaClient) => (req: express.Request, res
 	if (email === undefined) {
 		return next(failure());
 	}
-	if (prisma.user.findUnique({ where: { email } }) === null) {
+	const user = prisma.user.findUnique({ where: { email } });
+	if (user === null) {
 		return next(failure());
+	}
+	switch (level) {
+		case AuthLevel.admin:
+			if (user.member !== undefined || user.trainer !== undefined) {
+				return next({ status: 403 });
+			}
+			break;
+		case AuthLevel.member:
+			if (user.member === undefined) {
+				return next({ status: 403 });
+			}
+			break;
+		case AuthLevel.trainer:
+			if (user.trainer === undefined) {
+				return next({ status: 403 });
+			}
+			break;
 	}
 	next();
 };

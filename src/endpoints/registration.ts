@@ -19,7 +19,8 @@ const setup = (app: Express, prisma: PrismaClient) => {
 		});
 		const result = await EmailCheck.safeParseAsync(req.body);
 		if (!result.success) {
-			res.status(400).json({
+			// Not a 400 because this is just a validation endpoint
+			res.json({
 				success: false,
 				errors: z.flattenError(result.error),
 			});
@@ -38,7 +39,7 @@ const setup = (app: Express, prisma: PrismaClient) => {
 		});
 		const result = await Registration.safeParseAsync(req.body);
 		if (!result.success) {
-			res.json({
+			res.status(400).json({
 				success: false,
 				errors: z.flattenError(result.error),
 			});

@@ -15,11 +15,21 @@ export const setup = (app: Express, prisma: PrismaClient) => {
 			});
 			return;
 		}
-		const user = await prisma.user.findUnique({ where: { email: result.data.email } });
-		if (user === null) {
-			res.json({ success: false });
-			return;
+		try {
+			const user = await prisma.user.findUnique({ where: { email: result.data.email } });
+			if (user === null) {
+				res.json({ success: false });
+				return;
+			}
+			res.json({ success: true });
+		} catch (error) {
+			console.error(`${new Date().toString()} | ERROR: ${error}`);
+			res.status(500).json({
+				success: false,
+				errors: {
+					server: "Failed to log in",
+				},
+			});
 		}
-		res.json({ success: true });
 	});
 }

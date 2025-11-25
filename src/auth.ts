@@ -23,12 +23,17 @@ export const authenticate = (
 	if (email === undefined) {
 		return next(failure());
 	}
-	const user = await prisma.user.findUnique({ where: { email } });
-	if (user === null) {
-		return next(failure());
+	try {
+		const user = await prisma.user.findUnique({ where: { email } });
+		if (user === null) {
+			return next(failure());
+		}
+		if (user.role !== role) {
+			return next({ status: 403 });
+		}
+		next();
+	} catch (error) {
+		console.error(`${new Date().toString()} | ERROR: ${error}`);
+		return next({ status: 500 });
 	}
-	if (user.role !== role) {
-		return next({ status: 403 });
-	}
-	next();
 };

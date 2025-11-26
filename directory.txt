@@ -1,0 +1,16 @@
+RAMONA: -member stuff (minus dashboard)
+CALE: -dashboard from member, trainer stuff
+TOMI: -admin stuff
+
+member stuff:
+- profile.ts
+- dashboard.ts
+- booking.ts
+
+trainer stuff:
+- schedule.ts
+- lookup.ts
+
+admin stuff:
+- classmanage.ts
+- billing.ts

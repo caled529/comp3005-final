@@ -14,23 +14,34 @@
   "author": "Ramona Caprariu, Cale Dillon, Olutomi Sami",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "npm run build && node dist/index.js"
+    "build": "npm run build-server && npm run build-client",
+    "build-server": "tsc",
+    "build-client": "vite build --emptyOutDir",
+    "start": "npm run build && node dist/server/index.js",
+    "start-client": "vite",
+    "dev": "npm run start-client"
   },
   "devDependencies": {
     "@prisma/language-server": "^7.0.0",
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
+    "@vitejs/plugin-react": "^5.1.1",
     "prettier": "^3.6.2",
     "prisma": "^6.19.0",
     "typescript": "^5.9.3",
-    "typescript-language-server": "^5.1.2"
+    "typescript-language-server": "^5.1.2",
+    "vite": "^7.2.4"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^6.19.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "express": "^5.1.0",
     "pug": "^3.0.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.6",
     "zod": "^4.1.12"
   }
 }

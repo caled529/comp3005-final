@@ -9,8 +9,12 @@ app.use(express.json());
 
 const prisma = new PrismaClient();
 
+const root = path.join(import.meta.dirname, "../client/");
+
 // Frontend endpoint
-app.use("/app", express.static(path.join(import.meta.dirname, "../client/")));
+app.use("/app", express.static(path.join(root, "/index.html")));
+app.use("/app/assets", express.static(path.join(root, "/assets/")));
+app.use("/app/*route", express.static(path.join(root, "/index.html")));
 app.get("/", (_, res) => res.redirect("/app"));
 
 // API endpoints

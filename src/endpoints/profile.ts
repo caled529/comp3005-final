@@ -12,18 +12,17 @@
 // this file is responsible for getting stuff and showing it!
 import { PrismaClient } from "@prisma/client";
 import { type Express } from "express";
-import z from "zod";
 
-export const setup = (app: Express, prisma: PrismaClient) => {
-    app.put("/profile/details", async (req, res) => {
+export const setup = (app: Express, _prisma: PrismaClient) => {
+    app.put("/profile/details", async (_req, _res) => {
     // update the current user's profile details
     });
 
-    app.post("/profile/goals", async (req, res) => {
+    app.post("/profile/goals", async (_req, _res) => {
     // add a new fitness goal
     });
 
-    app.post("/profile/metrics", async (req, res) => {
+    app.post("/profile/metrics", async (_req, _res) => {
     // add a new health metric
     });
 }

@@ -16,27 +16,37 @@ function Dashboard() {
 }
 
 function Login() {
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<string>();
+	const [loggedIn, setLoggedIn] = useState(false);
 	return <div>
 		<form action={(data) => {
-			const email = data["email"];
+			const email = data.get("email");
 			fetch("/login", {
 				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email: email?.toString() }),
 			}).then((res) => res.json())
-				.then((res) => { // no more type safety :(
+				.then((res) => {
 					if (!res.success) {
-						if (res.errors !== null) {
-							setError(res.errors.fieldErrors.email)
-							return;
+						if (res.errors !== undefined) {
+							setError(res.errors.fieldErrors.email);
+						} else {
+							setError("Invalid login");
 						}
-						setError("Invalid login")
+					} else {
+						setLoggedIn(true);
 					}
 				});
 		}}>
-			<label hidden={error === null}>{error}</label>
-			<input name="email" />
-			<button type="submit">Login</button>
+			<label hidden={error === undefined} style={{color: "red"}}>
+				{error}<br />
+			</label>
+			<label >
+				Email: <input name="email" />
+			</label>
+			<button type="submit" disabled={loggedIn}>
+				{loggedIn ? "Logging in..." : "Log in"}
+			</button>
 		</form>
 	</div>;
 }

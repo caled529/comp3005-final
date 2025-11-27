@@ -3,14 +3,14 @@ import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 function Welcome() {
 	return <div>
-		<h1>Gym Management System</h1>
+		<h1>Awesome Gym &mdash; Welcome</h1>
 		<p>Please <Link to={"/app/login"}>log in.</Link></p>
 	</div>;
 }
 
 function Dashboard() {
 	return <div>
-		<h1>Gym Management System</h1>
+		<h1>Awesome Gym &mdash; Dashboard</h1>
 		<p>Welcome to the React version!</p>
 	</div>;
 }
@@ -20,11 +20,11 @@ function Login() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	return <div>
 		<form action={(data) => {
-			const email = data.get("email");
+			const email = data.get("email")!.toString();
 			fetch("/login", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email: email?.toString() }),
+				body: JSON.stringify({ email }),
 			}).then((res) => res.json())
 				.then((res) => {
 					if (!res.success) {
@@ -35,10 +35,13 @@ function Login() {
 						}
 					} else {
 						setLoggedIn(true);
+						// @ts-ignore: toBase64 is not recognized by tsserver yet
+						const encodedCreds = new TextEncoder().encode(email).toBase64();
+						localStorage.setItem("credentials", encodedCreds);
 					}
 				});
 		}}>
-			<label hidden={error === undefined} style={{color: "red"}}>
+			<label hidden={error === undefined} style={{ color: "red" }}>
 				{error}<br />
 			</label>
 			<label >

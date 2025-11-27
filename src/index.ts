@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
-import * as login from "./endpoints/login.js";
-import * as registration from "./endpoints/registration.js";
+import login from "./endpoints/login.js";
+import registration from "./endpoints/registration.js";
 import path from "path";
 
 const app = express();

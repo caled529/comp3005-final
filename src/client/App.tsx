@@ -29,9 +29,9 @@ function Login() {
 				.then((res) => {
 					if (!res.success) {
 						if (res.errors !== undefined) {
-							setError(res.errors.fieldErrors.email);
+							setError(res.errors.fieldErrors?.email);
 						} else {
-							setError("Invalid login");
+							setError("No user matches provided credentials");
 						}
 					} else {
 						setLoggedIn(true);

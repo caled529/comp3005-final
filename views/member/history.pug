@@ -1,0 +1,21 @@
+h2 Health History
+
+if metrics.length
+    table
+        thead
+            tr
+                th Date
+                th Height
+                th Weight
+                th Heart Rate
+                th Body Fat
+        tbody
+            each metric in metrics
+                tr
+                    td #{new Date(metric.recorded).toLocaleString()}
+                    td #{metric.height}
+                    td #{metric.weight}
+                    td #{metric.heartrate}
+                    td #{metric.bodyfat}
+else
+    p No metrics recorded yet.

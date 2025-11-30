@@ -1,0 +1,63 @@
+extends ../layout
+
+block menu
+  include ../headers/memberheader
+
+block content
+    h1 Profile
+    h2 Manage Details:
+    form(action="/profile" method="POST")
+        label(for="name") Name:
+        input(type="name" name="name" value=user.name required)
+        br
+        label(for="email") Email:
+        input(type="email" name="email" value=user.email required)
+        br
+        label(for="phone") Phone Number:
+        input(type="phone" name="phone" value=user.member.phone required)
+        br
+        button(type="save") Save Changes
+
+    h2 Fitness Goals:
+    form(action="/goals" method="POST")
+        label Type:
+        select(name="type")
+            option(value="weight") Weight
+            option(value="bodyFat") Body Fat
+        label Target:
+        input(type="number" step="0.1" name="target" required)
+        button(type="submit") Add Goal
+
+    //- list existing goals
+    if goals && goals.length
+        ul
+            each g in goals
+                li
+                    | #{g.type} goal → target: #{g.target}
+                    if activeGoalId === g.id
+                        |  (ACTIVE)
+                    else
+                    form(action="/goals/activate" method="POST" style="display:inline")
+                        input(type="hidden" name="goalId" value=g.id)
+                        button(type="submit") Make Active
+    else
+        p No goals yet
+
+    h2 Log Health Metrics:
+    form(action="/metrics" method="POST")
+        label Weight (kg)
+        input(type="number" name="weight")
+
+        label Height (cm)
+        input(type="number" name="height")
+
+        label Heart Rate (bpm)
+        input(type="number" name="heartRate")
+
+        label Body Fat (%)
+        input(type="number" name="bodyFat")
+
+        button(type="submit") Add Entry
+    
+    p
+    a(href="/history") View Health History →

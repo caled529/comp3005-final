@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output = "./generated"
   previewFeatures = ["views"]
 }
 
@@ -82,8 +81,8 @@ model Metric {
 
 model PersonalSession {
   id        Int      @id @default(autoincrement())
-  room      Room     @relation(fields: [roomId], references: [id])
-  roomId    Int
+  room      Room?     @relation(fields: [roomId], references: [id])
+  roomId    Int?
   trainer   Trainer  @relation(fields: [trainerId], references: [userId])
   trainerId Int
   member    Member   @relation(fields: [memberId], references: [userId])

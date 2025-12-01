@@ -60,6 +60,31 @@ CREATE TABLE "Metric" (
     REFERENCES "Member"("userId")
 );
 
+-- makes the lateral join in the MemberLookup view faster
+CREATE INDEX "MemberMetricIndex"
+  ON "Metric" ("memberId", recorded DESC);
+
+CREATE VIEW "MemberLookup" AS
+  SELECT 
+    u.name,
+    mt.recorded,
+    mt.height,
+    mt.weight,
+    mt.heartrate,
+    mt.bodyfat,
+    g.type as "goalType",
+    g.target as "goalTarget"
+  FROM "User" u
+  JOIN "Member" m ON u.id = m."userId"
+  LEFT JOIN "Goal" g ON m."activeGoalId" = g.id
+  LEFT JOIN LATERAL (
+    SELECT *
+    FROM "Metric" 
+    WHERE "memberId" = m."userId"
+    ORDER BY recorded DESC
+    LIMIT 1
+  ) mt ON true;
+
 CREATE TABLE "Trainer" (
   "userId"  INTEGER  PRIMARY KEY,
   FOREIGN KEY ("userId")
@@ -99,7 +124,7 @@ CREATE TABLE "Room" (
   allows    "BookingType"  NOT NULL DEFAULT 'all'
 );
 
-CREATE TABLE PersonalSession (
+CREATE TABLE "PersonalSession" (
   id           SERIAL     PRIMARY KEY,
   "roomId"     INTEGER    NOT NULL,
   "trainerId"  INTEGER    NOT NULL,

@@ -1,0 +1,41 @@
+extends ../layout
+
+block menu
+  include ../headers/trainerheader
+
+block content
+  h1 Awesome Gym &mdash; Member Lookup
+  
+  form(method="GET")
+    label Search by name:
+      input(type="text", name="name", value=name,placeholder="Enter name")
+    button(type="submit") Search
+  
+  if name !== undefined && name.trim().length > 0
+    if members && members.length > 0
+      table(border="1")
+        thead
+          tr
+            th Name
+            th Height
+            th Weight
+            th Heart Rate
+            th Body Fat %
+            th Last Metric
+            th Goal Type
+            th Goal Target
+        tbody
+          each member in members
+            tr
+              td= member.name
+              td= member.height
+              td= member.weight
+              td= member.heartrate
+              td= member.bodyfat
+              td= member.recorded
+              td= member.goalType
+              td= member.goalTarget
+    else
+      p No members found matching "#{name}"
+  else
+    p Enter a member name to search

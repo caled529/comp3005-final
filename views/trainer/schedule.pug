@@ -1,0 +1,52 @@
+extends ../layout
+
+block menu
+  include ../headers/trainerheader
+
+block content
+  h1 Awesome Gym &mdash; Trainer Schedule
+
+  h2 Classes
+  if classes !== undefined && classes.length > 0
+    table(border="1")
+      thead
+        tr
+          th Date
+          th Start
+          th End
+          th Room
+          th Name
+          th Registered
+      tbody
+        each c in classes
+          tr
+            td= c.date
+            td= c.start
+            td= c.end
+            td= c.room
+            td= c.name
+            td= c.registered
+  else
+    p None scheduled.
+
+  h2 Personal Training Sessions
+  if sessions !== undefined && sessions.length > 0
+    table(border="1")
+      thead
+        tr
+          th Date
+          th Start
+          th End
+          th Room
+          th Member
+      tbody
+        each session in sessions
+          tr
+            td= session.date
+            td= session.start
+            td= session.end
+            td= session.room
+            td= session.member
+  else
+    p None scheduled.
+

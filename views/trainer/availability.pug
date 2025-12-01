@@ -1,0 +1,67 @@
+extends ../layout
+
+block menu
+  include ../headers/trainerheader
+
+block content
+  h1 Awesome Gym &mdash; Trainer Availability
+  
+  if error
+    p(style="color: red; font-weight: bold;")= error
+  
+  form(method="POST")
+    label Day:
+      select(id="day", name="day" required)
+        option(value="monday") Monday
+        option(value="tuesday") Tuesday
+        option(value="wednesday") Wednesday
+        option(value="thursday") Thursday
+        option(value="friday") Friday
+        option(value="saturday") Saturday
+        option(value="sunday") Sunday
+    br
+    label Start Time:
+      input(type="time", id="startTime", name="startTime", required)
+    br
+    label End Time:
+      input(type="time", id="endTime", name="endTime", required)
+    br
+    label Date (optional):
+      input(type="date", id="date", name="date")
+      small  (one-time availability)
+    br
+    button(type="submit") Add Availability
+
+  h2 Weekly Availability
+  if weekly && weekly.length > 0
+    table(border="1")
+      thead
+        tr
+          th Day
+          th Start Time
+          th End Time
+      tbody
+        each w in weekly
+          tr
+            td= w.day
+            td= w.startTime
+            td= w.endTime
+  else
+    p None.
+
+  h2 One Time Availability
+  if oneTime && oneTime.length > 0
+    table(border="1")
+      thead
+        tr
+          th Date
+          th Start Time
+          th End Time
+      tbody
+        each o in oneTime
+          tr
+            td= o.date
+            td= o.startTime
+            td= o.endTime
+  else
+    p None.

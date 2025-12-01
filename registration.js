@@ -43,7 +43,7 @@ const setup = (app) => {
 			} finally {
 				conn.release();
 			}
-			res.status(201).redirect("/login");
+			res.status(201).redirect("/");
 		} catch (error) {
 			console.error(`${new Date().toString()} | ERROR: ${error}`);
 			res.sendStatus(500);

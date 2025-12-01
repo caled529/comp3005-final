@@ -7,7 +7,7 @@ CREATE TYPE "Role" AS ENUM (
 CREATE TABLE "User" (
   id        SERIAL  PRIMARY KEY,
   email     TEXT    UNIQUE NOT NULL,
-	password  TEXT    NOT NULL,
+  password  TEXT    NOT NULL,
   name      TEXT    NOT NULL,  
   role      "Role"  NOT NULL DEFAULT 'member'
 );

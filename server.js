@@ -23,7 +23,6 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-
 app.post('/login', login);
 app.get('/logout', logout);
 
@@ -32,6 +31,9 @@ app.get("/", (req, res) => {
     // console.log("env db_password:", process.env.db_password);
     res.render("login");   // this loads views/login.pug
 });
+
+app.get("/register", (_, res) => res.render("register"));
+require("./registration.js").setup(app);
 
 // app.get("/debug", (req, res) => {
 //   res.json(req.session);

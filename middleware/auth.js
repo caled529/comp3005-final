@@ -68,14 +68,14 @@ async function login(req, res) {
 //logout
 function logout(req, res) {
   req.session.destroy(() => {
-    res.send("Logged out");
+    res.redirect("/");
   });
 }
 
 //authentication
 function requireLogin(req, res, next) {
   if (!req.session.loggedin) {
-    return res.status(401).send("You must be logged in");
+    return res.status(401).redirect("/");
   }
   next();
 }
@@ -84,10 +84,10 @@ function requireLogin(req, res, next) {
 function requireRole(role) {
   return (req, res, next) => {
     if (!req.session.loggedin) {
-      return res.status(401).send("You must be logged in");
+      return res.status(401).redirect("/");
     }
     if (req.session.role !== role) {
-      return res.status(403).send("Forbidden");
+      return res.sendStatus(403);
     }
     next();
   };

@@ -15,6 +15,11 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "pg": "^8.16.3",
-    "pug": "^3.0.3"
+    "pug": "^3.0.3",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "typescript-language-server": "^5.1.3"
   }
 }

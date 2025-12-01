@@ -1,7 +1,7 @@
 const z = require("zod");
 const { pool } = require("./dbConnect");
 
-const setup = (app) => {
+const registration = (app) => {
 	const UniqueEmail = z.email().refine(
 		async (email) => {
 			const result = await pool.query('SELECT id FROM "User" WHERE email = $1', [email]);
@@ -51,4 +51,4 @@ const setup = (app) => {
 	});
 };
 
-module.exports = { setup };
+module.exports = { registration };

@@ -5,14 +5,15 @@ const fs = require("fs");
 // const dotenv = require("dotenv");
 const { pool } = require("./dbConnect");
 const { login, logout, requireLogin, requireRole } = require("./middleware/auth");
+const { registration } = require("./registration.js");
 
 // dotenv.config();
 const app = express();
 
 app.use(session({
-  secret: "secretive",
-  resave: false,
-  saveUninitialized: false
+	secret: "secretive",
+	resave: false,
+	saveUninitialized: false
 }));
 
 app.use(express.urlencoded({ extended: true })); //for form data parsing
@@ -23,17 +24,14 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.get("/", (_, res) => res.render("welcome"));
+
+app.get("/login", (_, res) => res.render("login"));
 app.post('/login', login);
 app.get('/logout', logout);
 
-app.get("/", (req, res) => {
-    // console.log("env db_user:", process.env.db_user);
-    // console.log("env db_password:", process.env.db_password);
-    res.render("login");   // this loads views/login.pug
-});
-
 app.get("/register", (_, res) => res.render("register"));
-require("./registration.js").setup(app);
+app.post("/register", registration);
 
 // app.get("/debug", (req, res) => {
 //   res.json(req.session);
@@ -41,7 +39,7 @@ require("./registration.js").setup(app);
 
 //member dashboard
 app.get("/dashboard", requireLogin, (req, res) => {
-    res.render("member/dashboard", { name: req.session.name });
+	res.render("member/dashboard", { name: req.session.name });
 });
 
 //mounting the role routers
@@ -63,7 +61,7 @@ app.use(requireRole("admin"), adminRouter);
 
 //for the invalid routes
 app.use((req, res) => {
-    res.status(404).send("Route not found");
+	res.status(404).send("Route not found");
 });
 
 app.listen(3000);

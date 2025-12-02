@@ -57,7 +57,7 @@ async function login(req, res) {
         case "trainer":
             return res.redirect("/schedule");
         case "admin":
-            return res.redirect("/management");
+            return res.redirect("/billing");
         default:
             return res.redirect("/");
     }

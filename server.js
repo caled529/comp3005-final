@@ -23,23 +23,28 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public")));
 
-
+//ROUTES FOR ALL
+app.get("/", (req, res) => { res.render("homepage");});
+app.get('/login', (req, res) => { res.render("login"); });
 app.post('/login', login);
 app.get('/logout', logout);
 
-app.get("/", (req, res) => {
-    // console.log("env db_user:", process.env.db_user);
-    // console.log("env db_password:", process.env.db_password);
-    res.render("login");   // this loads views/login.pug
-});
+app.get("/register", (_, res) => res.render("register"));
+require("./registration.js").setup(app);
 
-// app.get("/debug", (req, res) => {
-//   res.json(req.session);
-// });
-
-//member dashboard
+//PROTECTED ROUTES
+//member
 app.get("/dashboard", requireLogin, (req, res) => {
     res.render("member/dashboard", { name: req.session.name });
+});
+
+//trainer
+
+
+//TO DO: change to /management
+//admin
+app.get("/billing", requireLogin, (req, res) => {
+    res.render("admin/billing");
 });
 
 //mounting the role routers

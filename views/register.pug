@@ -1,0 +1,30 @@
+doctype html
+html
+  head
+    title Registration
+  body
+    h1 New Member Registration
+    form(action="/register" method="POST")
+      label Email: 
+        input(type="email" name="email" required)
+      br
+      label Password: 
+        input(type="password" name="password" required)
+      br
+      label Name: 
+        input(type="text" name="name" required)
+      br
+      label Phone Number: 
+        input(type="tel" name="phone" required)
+      br
+      label Date of birth: 
+        input(type="date" name="birthdate" required)
+      br
+      label Gender: 
+        select(name="gender" required)
+          option(value="") -- Please select --
+          option(value="male") Male
+          option(value="female") Female
+          option(value="other") Other
+      br
+      button(type="submit") Register

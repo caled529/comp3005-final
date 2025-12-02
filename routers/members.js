@@ -467,7 +467,7 @@ router.post("/booking/session", async (req, res) => {
         ]);
 
     //    res.redirect("/booking?success=pt");
-    res.redirect("/booking");
+    res.redirect("/member/booking");
 
     } catch (err) {
         console.error(err);
@@ -508,7 +508,7 @@ router.post("/booking/class", async (req, res) => {
         `, [classId, memberId]);
 
         // res.redirect("/booking?success=class");
-        res.redirect("/booking");
+        res.redirect("/member/booking");
 
     } catch (err) {
         console.error(err);

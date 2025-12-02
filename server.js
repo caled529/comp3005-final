@@ -47,7 +47,7 @@ app.get("/trainer", requireRole("trainer"), (_, res) => res.render("headers/trai
 app.get("/trainer/schedule", requireRole("trainer"), async (req, res) => {
 	try {
 		const trainerId = req.session.userId;
-		const classesResult = await pool.query(sql`
+		const classesResult = await pool.query(`
 			SELECT 
 				sc."startTime" as start,
 				sc."endTime" as end,
@@ -63,7 +63,7 @@ app.get("/trainer/schedule", requireRole("trainer"), async (req, res) => {
 			ORDER BY sc."startTime"
 		`, [trainerId]);
 
-		const sessionsResult = await pool.query(sql`
+		const sessionsResult = await pool.query(`
 			SELECT 
 				ps."startTime" as start,
 				ps."endTime" as end,
@@ -107,7 +107,7 @@ app.get("/trainer/lookup", requireRole("trainer"), async (req, res) => {
 		let members = [];
 
 		if (name.length > 0) {
-			const result = await pool.query(sql`
+			const result = await pool.query(`
 				SELECT * FROM "MemberLookup"
 				WHERE LOWER(name) LIKE LOWER($1)
 				ORDER BY name
@@ -137,7 +137,7 @@ app.get("/trainer/lookup", requireRole("trainer"), async (req, res) => {
 
 app.get("/trainer/availability", requireRole("trainer"), async (req, res) => {
 	try {
-		const result = await pool.query(sql`
+		const result = await pool.query(`
 			SELECT id, day, "startTime"::TEXT, "endTime"::TEXT, date
 			FROM "Availability"
 			WHERE "trainerId" = $1
@@ -173,7 +173,7 @@ app.post("/trainer/availability", requireRole("trainer"), async (req, res) => {
 		const trainerId = req.session.userId;
 		const { day, startTime, endTime, date } = req.body;
 
-		const result = await pool.query(sql`
+		const result = await pool.query(`
 			SELECT id FROM "Availability"
 			WHERE "trainerId" = $1
 			AND day = $2
@@ -186,7 +186,7 @@ app.post("/trainer/availability", requireRole("trainer"), async (req, res) => {
 		`, [trainerId, day, date || null, startTime, endTime]);
 
 		if (result.rows.length > 0) {
-			const result = await pool.query(sql`
+			const result = await pool.query(`
 			SELECT id, day, "startTime"::TEXT, "endTime"::TEXT, date
 			FROM "Availability"
 			WHERE "trainerId" = $1

@@ -1,16 +1,15 @@
 const z = require("zod");
 const { pool } = require("./dbConnect");
 
-const registration = (app) => {
-	const UniqueEmail = z.email().refine(
-		async (email) => {
-			const result = await pool.query('SELECT id FROM "User" WHERE email = $1', [email]);
-			return result.rows.length === 0;
-		},
-		{ error: "Invalid input: email already in use" },
-	);
+const UniqueEmail = z.email().refine(
+	async (email) => {
+		const result = await pool.query('SELECT id FROM "User" WHERE email = $1', [email]);
+		return result.rows.length === 0;
+	},
+	{ error: "Invalid input: email already in use" },
+);
 
-	app.post("/register", async (req, res) => {
+const registration = async (req, res) => {
 		const Registration = z.object({
 			email: UniqueEmail,
 			password: z.string(),
@@ -48,7 +47,6 @@ const registration = (app) => {
 			console.error(`${new Date().toString()} | ERROR: ${error}`);
 			res.sendStatus(500);
 		}
-	});
-};
+	};
 
 module.exports = { registration };

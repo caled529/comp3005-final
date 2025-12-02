@@ -74,3 +74,14 @@ VALUES
   (1, 2, 6, 1, '2025-12-03 13:00:00', '2025-12-03 14:00:00'),
   (2, 3, 7, 1, '2025-12-05 10:00:00', '2025-12-05 11:00:00'),
   (3, 3, 5, 4, '2025-12-02 11:00:00', '2025-12-02 12:00:00');
+
+
+SELECT
+	pg_catalog.setval('"Availability_id_seq"',    (SELECT COALESCE(MAX(id), 0) FROM "Availability"), true),
+	pg_catalog.setval('"ClassType_id_seq"',       (SELECT COALESCE(MAX(id), 0) FROM "ClassType"), true),
+	pg_catalog.setval('"Goal_id_seq"',            (SELECT COALESCE(MAX(id), 0) FROM "Goal"), true),
+	pg_catalog.setval('"PersonalSession_id_seq"', (SELECT COALESCE(MAX(id), 0) FROM "PersonalSession"), true),
+	pg_catalog.setval('"Room_id_seq"',            (SELECT COALESCE(MAX(id), 0) FROM "Room"), true),
+  pg_catalog.setval('"ScheduledClass_id_seq"',  (SELECT COALESCE(MAX(id), 0) FROM "ScheduledClass"), true),
+  pg_catalog.setval('"User_id_seq"',            (SELECT COALESCE(MAX(id), 0) FROM "User"), true);
+

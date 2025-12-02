@@ -105,7 +105,7 @@ router.post("/classmanage/new", async (req, res) => {
 router.get("/classmanage/pt", async (req, res) => {
   try {
     const sessions = await pool.query(
-      `SELECT ps.id, ps."startTime", ps."endTime", mu.name AS memberName, tu.name AS trainerName
+      `SELECT ps.id, ps."startTime", ps."endTime", mu.name AS "memberName", tu.name AS "trainerName"
       FROM "PersonalSession" ps
       JOIN "Member" m ON ps."memberId" = m."userId"
       JOIN "User" mu ON m."userId" = mu.id

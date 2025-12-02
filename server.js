@@ -35,16 +35,14 @@ require("./registration.js").setup(app);
 //PROTECTED ROUTES
 //member
 app.get("/dashboard", requireLogin, (req, res) => {
+    //console.log("I'm in server.js, member dashboard!!!");
     res.render("member/dashboard", { name: req.session.name });
 });
 
-//trainer
-
-
-//TO DO: change to /management
-//admin
-app.get("/billing", requireLogin, (req, res) => {
-    res.render("admin/billing");
+//admin billing
+app.get("/management", requireLogin, (req, res) => {
+    //console.log("I'm in server.js in management!!!");
+    res.render("admin/management");
 });
 
 //mounting the role routers
@@ -54,9 +52,16 @@ const trainerRouter = require("./routers/trainers");
 // app.use("/", trainerRouter);
 const adminRouter = require("./routers/admins");
 // app.use("/", adminRouter);
-app.use(requireRole("member"), memberRouter);
-app.use(requireRole("trainer"), trainerRouter);
-app.use(requireRole("admin"), adminRouter);
+app.use("/management", adminRouter);
+//app.use("/billing", adminRouter);
+// app.use(adminRouter);
+// app.use(memberRouter);
+// app.use(trainerRouter);
+// app.use(requireRole("admin"), adminRouter);
+// app.use(requireRole("member"), memberRouter);
+// app.use(requireRole("trainer"), trainerRouter);
+
+//app.use(requireRole("admin"), adminRouter);
 
 
 // app.get("/", (req, res) => {

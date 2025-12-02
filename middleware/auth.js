@@ -31,6 +31,9 @@ async function login(req, res) {
     req.session.name = user.name;
     req.session.role = user.role;
 
+    // console.log(user.role);
+    // console.log(user.name);
+
     //additional parameters added if member role
     if (user.role === "member") {
         const memberResult = await pool.query(
@@ -57,7 +60,7 @@ async function login(req, res) {
         case "trainer":
             return res.redirect("/schedule");
         case "admin":
-            return res.redirect("/billing");
+            return res.redirect("/management");
         default:
             return res.redirect("/");
     }
@@ -82,11 +85,17 @@ function requireLogin(req, res, next) {
 
 //authorization for specific role
 function requireRole(role) {
+  console.log("Entering requireRole function with " + role);
   return (req, res, next) => {
     if (!req.session.loggedin) {
+      console.log("I'm in You're not logged in!");
+      console.log(req.session.role);
       return res.status(401).send("You must be logged in");
     }
     if (req.session.role !== role) {
+      console.log("I'm in you're not authorized!");
+      console.log(req.session.role);
+      console.log(role);
       return res.status(403).send("Forbidden");
     }
     next();

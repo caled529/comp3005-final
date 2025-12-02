@@ -1,0 +1,9 @@
+extends ../layout
+
+block menu
+  include ../headers/adminheader
+
+block content
+  h1= title
+  p Invoice for #{name} member ID #{memberId} has been submitted successfully.
+  a(href="/management/billing") Back to Billing

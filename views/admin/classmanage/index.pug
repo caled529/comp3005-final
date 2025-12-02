@@ -1,0 +1,16 @@
+extends ../../layout
+
+block menu
+  include ../../headers/adminheader
+
+block content
+  h1 Class Management
+
+  p Choose an action below:
+
+  div.actions
+    a.button(href="/management/classmanage/new") Add a New Class Type
+    br
+    a.button(href="/management/classmanage/pt") Approve PT Sessions
+    br
+    a.button(href="/management/classmanage/group") Create a new Scheduled Group Class

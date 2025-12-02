@@ -1,0 +1,16 @@
+extends ../../layout
+
+block menu
+  include ../../headers/adminheader
+
+block content
+  h1 Add New Class Type
+
+  form(method="POST", action="/management/classmanage/new")
+    label(for="name") Class Type Name:
+    input(type="text", name="name", id="name", required)
+    br
+    button(type="submit") Add Class Type
+
+  hr
+  a(href="/management/classmanage") ← Back to Class Management

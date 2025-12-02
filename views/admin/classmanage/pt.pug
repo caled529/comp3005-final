@@ -1,0 +1,52 @@
+extends ../../layout
+
+block menu
+  include ../../headers/adminheader
+
+block content
+  h1 Approve PT Sessions
+
+  if sessions.length
+    form(method="POST", action="/management/classmanage/pt")
+      table(border="1", cellpadding="8")
+        thead
+          tr
+            th Member
+            th Trainer
+            th Start Time
+            th End Time
+            th Room
+        tbody
+          each s in sessions
+            tr
+              td= s.memberName
+              td= s.trainerName
+              td= new Date(s.startTime).toLocaleString()
+              td= new Date(s.endTime).toLocaleString()
+              td
+                select(name="room_" + s.id)
+                  option(value="") -- select room --
+                  each r in rooms
+                    option(value=r.id)= `Room ${r.id} (cap ${r.capacity})`
+
+      input(type="hidden", name="updates", id="updatesInput")
+      br
+      button(type="button", onclick="submitUpdates()") Save Changes
+  else
+    p There are no pending PT sessions currently requiring room assignment.
+
+  hr
+  a(href="/management/classmanage") ← Back to Class Management
+
+  script.
+    function submitUpdates() {
+      const data = [];
+      document.querySelectorAll('select').forEach(sel => {
+        if (sel.value) {
+          const sessionId = sel.name.split('_')[1];
+          data.push({ sessionId, roomId: sel.value });
+        }
+      });
+      document.getElementById('updatesInput').value = JSON.stringify(data);
+      document.forms[0].submit();
+    }

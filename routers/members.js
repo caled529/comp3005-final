@@ -25,7 +25,117 @@ function nextDateForWeekday(weekday) {
 }
 
 router.get("/dashboard", async (req, res) => {
-    res.render("member/dashboard", { name: req.session.name });
+    // res.render("member/dashboard", { name: req.session.name });
+    const memberId = req.session.userId;
+
+    //upcoming pt sessions
+    const ptSessions = await pool.query(
+        `SELECT 
+            ps."startTime",
+            ps."endTime",
+            u.name AS trainername
+        FROM "PersonalSession" ps
+        JOIN "User" u ON u.id = ps."trainerId"
+        WHERE ps."memberId" = $1
+        ORDER BY ps."startTime" ASC
+        LIMIT 10;
+    `, [memberId]);
+
+    //upcoming group classes
+    const classBookings = await pool.query(
+        `SELECT 
+            sc."startTime",
+            sc."endTime",
+            ct.name AS classname,
+            u.name AS trainername
+        FROM "ClassRegistration" cr
+        JOIN "ScheduledClass" sc ON sc.id = cr."classId"
+        JOIN "ClassType" ct ON ct.id = sc."typeId"
+        JOIN "User" u ON u.id = sc."trainerId"
+        WHERE cr."memberId" = $1
+        ORDER BY sc."startTime" ASC
+        LIMIT 10;
+    `, [memberId]);
+
+    // res.render("member/dashboard", {
+    //     name: req.session.name,
+    //     ptSessions: ptSessions.rows,
+    //     classBookings: classBookings.rows
+    // });
+    const activeGoalResult = await pool.query(`
+        SELECT id, type, target 
+        FROM "Goal"
+        WHERE id = (
+            SELECT "activeGoalId" 
+            FROM "Member"
+            WHERE "userId" = $1
+        );
+    `, [memberId]);
+
+    const activeGoal = activeGoalResult.rows[0] || null;
+
+    //most recent metric
+    const metricResults = await pool.query(`
+        SELECT weight, bodyfat
+        FROM "Metric"
+        WHERE "memberId" = $1
+        ORDER BY recorded DESC
+        LIMIT 1;
+    `, [memberId]);
+
+    const mostRecMetric = metricResults.rows[0] || null;
+
+    let progress = null;
+
+    if (activeGoal && mostRecMetric) {
+
+        if (activeGoal.type === "weight") {
+            const current = mostRecMetric.weight;
+            const target = activeGoal.target;
+
+            let percent;
+            if (current <= target) {
+                percent = 100;
+            } else {
+                percent = 100 - ((current - target) / target) * 100;
+            }
+
+            progress = {
+                type: "weight",
+                current,
+                target,
+                percent: Math.max(0, percent).toFixed(1)
+            };
+        }
+
+        if (activeGoal.type === "bodyFat") {
+            const current = mostRecMetric.bodyfat;
+            const target = activeGoal.target;
+
+            let percent;
+            if (current <= target) {
+                percent = 100;
+            } else {
+                percent = 100 - ((current - target) / target) * 100;
+            }
+
+            progress = {
+                type: "bodyFat",
+                current,
+                target,
+                percent: Math.max(0, percent).toFixed(1)
+            };
+        }
+}
+
+    res.render("member/dashboard", {
+        name: req.session.name,
+        ptSessions: ptSessions.rows,
+        classBookings: classBookings.rows,
+        activeGoal,
+        mostRecMetric,
+        progress
+    });
 });
 
 

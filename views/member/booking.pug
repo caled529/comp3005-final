@@ -1,0 +1,50 @@
+extends ../layout
+
+block menu
+    include ../headers/memberheader
+
+block content
+    h1 Book Personal Training & Classes
+
+    h2 Personal Training Session
+    form(action="/member/booking/session" method="POST")
+
+        label Select Trainer:
+        select#trainer-select(name="trainerId")
+            option(value="" disabled selected) -- Select Trainer --
+            each t in trainers
+                option(value=t.userId)= t.name
+
+        label Day:
+        select#day-select(name="day" disabled)
+            option(value="" disabled selected) -- Select Day --
+
+        label Start Time:
+        select#start-select(name="startTime" disabled)
+            option(value="" disabled selected) -- Select Start Time --
+
+        label End Time:
+        input#end-time(type="time" name="endTime" readonly)
+
+        button(type="submit") Book PT Session
+
+
+    h2 Group Classes
+    ul
+        each c in classes
+            li
+                | Class: #{c.name} with Trainer: #{c.trainername}
+                - const startDate = new Date(c.startTime)
+                - const weekday = startDate.toLocaleDateString("en-US", { weekday: "long" })
+                - const timeStr = startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                | → #{weekday} at #{timeStr}
+                if c.already_registered
+                    span(style="color: green")  Registered!
+                else if c.capacity_remaining > 0
+                    form(action="/member/booking/class" method="POST" style="display:inline")
+                        input(type="hidden" name="classId" value=c.id)
+                        button(type="submit") Register
+                else
+                    span (FULL)
+
+    script(src="/booking.js")

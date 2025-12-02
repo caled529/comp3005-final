@@ -21,21 +21,31 @@ app.use(express.json());
 app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 
-//ROUTES FOR ALL
+//PUBLIC ROUTES
 app.get("/", (req, res) => { res.render("homepage");});
 app.get('/login', (req, res) => { res.render("login"); });
 app.post('/login', login);
-app.get('/logout', logout);
 
 app.get("/register", (_, res) => res.render("register"));
 require("./registration.js").setup(app);
 
+app.get('/logout', logout);
+
 //PROTECTED ROUTES
 //member
 app.get("/dashboard", requireLogin, (req, res) => {
-    res.render("member/dashboard", { name: req.session.name });
+    res.redirect("/member/dashboard");
+});
+app.get("/profile", requireLogin, (req, res) => {
+    res.redirect("/member/profile");
+});
+app.get("/booking", requireLogin, (req, res) => {
+     res.redirect("/member/booking");
+});
+app.get("/history", requireLogin, (req, res) => {
+    res.redirect("/member/history");
 });
 
 //trainer
@@ -54,7 +64,7 @@ const trainerRouter = require("./routers/trainers");
 // app.use("/", trainerRouter);
 const adminRouter = require("./routers/admins");
 // app.use("/", adminRouter);
-app.use(requireRole("member"), memberRouter);
+app.use("/member", requireRole("member"), memberRouter);
 app.use(requireRole("trainer"), trainerRouter);
 app.use(requireRole("admin"), adminRouter);
 

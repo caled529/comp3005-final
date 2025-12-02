@@ -5,6 +5,30 @@ const router = express.Router();
 
 router.use(requireRole("member"));
 
+function nextDateForWeekday(weekday) {
+    const days = {
+        monday: 1,
+        tuesday: 2,
+        wednesday: 3,
+        thursday: 4,
+        friday: 5,
+        saturday: 6,
+        sunday: 0
+    };
+
+    const today = new Date();
+    const dayIndex = days[weekday];
+
+    const result = new Date(today);
+    result.setDate(today.getDate() + ((7 + dayIndex - today.getDay()) % 7));
+    return result;
+}
+
+router.get("/dashboard", async (req, res) => {
+    res.render("member/dashboard", { name: req.session.name });
+});
+
+
 //show profile details
 router.get("/profile", async (req, res) => {
     try {
@@ -169,14 +193,218 @@ router.get("/history", async (req, res) => {
     res.render("member/history", { metrics: result.rows });
 });
 
+router.get("/booking", async (req, res) => {
+    const memberId = req.session.userId;
+
+    //getting all the trainers from table
+    const trainers = await pool.query(
+        `SELECT "User".id as "userId", "User".name
+        FROM "User"
+        JOIN "Trainer" ON "User".id = "Trainer"."userId"
+    `);
+
+    //classes for registration
+    //subquery for already registered AND capacity allowance
+    //usage of aliases since lots of continual table references
+    const classes = await pool.query(
+        `SELECT 
+            sc.id,
+            ct.name,
+            u.name AS trainername,
+            sc."startTime",
+            sc."endTime",
+            (SELECT COUNT(*) FROM "ClassRegistration" cr WHERE cr."classId" = sc.id AND cr."memberId" = $1) > 0 AS already_registered,
+            (
+                SELECT r.capacity - COUNT(cr2."memberId")
+                FROM "Room" r
+                JOIN "ScheduledClass" sc2 ON sc2."roomId" = r.id
+                LEFT JOIN "ClassRegistration" cr2 ON cr2."classId" = sc2.id
+                WHERE sc2.id = sc.id
+                GROUP BY r.capacity
+            ) AS capacity_remaining
+        FROM "ScheduledClass" sc
+        JOIN "ClassType" ct ON ct.id = sc."typeId"
+        JOIN "User" u ON u.id = sc."trainerId"
+        ORDER BY sc."startTime";
+    `, [memberId]);
+
+    res.render("member/booking", {
+        user: req.session,
+        trainers: trainers.rows,
+        classes: classes.rows
+    });
+});
+
+//based upon the trainer selected (needs to happen first)
+router.get("/availability/:trainerId", async (req, res) => {
+    const trainerId = req.params.trainerId;
+
+    try {
+        //get the availability (all)
+        const availResult = await pool.query(`
+            SELECT day, "startTime", "endTime"
+            FROM "Availability"
+            WHERE "trainerId" = $1
+        `, [trainerId]);
+
+        //get the booked sessions 
+        const sessionResult = await pool.query(`
+            SELECT 
+                EXTRACT(DOW FROM "startTime") AS dow,
+                "startTime",
+                "endTime"
+            FROM "PersonalSession"
+            WHERE "trainerId" = $1
+        `, [trainerId]);
+
+        //booked sessions map, key is day of week (dow) and values (as set) are the starting hours blocked off
+        const bookedHours = {};
+
+        const sessions = sessionResult.rows;
+        const availability = availResult.rows;
+
+        const weekdayIndex = {
+            sunday: 0,
+            monday: 1,
+            tuesday: 2,
+            wednesday: 3,
+            thursday: 4,
+            friday: 5,
+            saturday: 6
+        };
+
+        //build response
+        const withoutBookings = availability.map(a => {
+            const startHour = Number(a.startTime.split(":")[0]);
+            const endHour = Number(a.endTime.split(":")[0]);
+
+            let hours = [];
+            for (let h = startHour; h < endHour; h++) {
+                hours.push(h);
+            }
+
+            //remove the booked hours
+            hours = hours.filter(h => {
+                return !sessions.some(s => {
+                    const sessionDay = Number(s.dow);
+                    const availDay = weekdayIndex[a.day];
+
+                    if (sessionDay !== availDay) return false;
+
+                    const bookedDate = new Date(s.startTime);
+                    const bookedStartHour = bookedDate.getHours();
+
+                    return bookedStartHour === h;
+                });
+            });
+
+            return {
+                day: a.day,
+                hours
+            };
+        });
+
+        res.json(withoutBookings);
+
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+});
 
 
-// app.get("/profile/:id", async (req, res) => {
-//   const result = await pool.query("SELECT * FROM users WHERE id=$1", [
-//     req.params.id,
-//   ]);
-//   res.render("profile", { user: result.rows[0] });
-// });
+router.get("/booking/existing/:trainerId/:day", async (req, res) => {
+    const { trainerId, day } = req.params;
+
+    const result = await pool.query(`
+        SELECT "startTime", "endTime"
+        FROM "PersonalSession"
+        WHERE "trainerId" = $1
+        AND EXTRACT(DOW FROM "startTime") = EXTRACT(DOW FROM $2::date)
+    `, [trainerId, nextDateForWeekday(day).toISOString().slice(0,10)]);
+
+    res.json(result.rows);
+});
+
+//pt sessions
+router.post("/booking/session", async (req, res) => {
+    const memberId = req.session.userId;
+    const { trainerId, day, startTime, endTime } = req.body;
+
+    try {
+        //building real timestamps
+        const date = nextDateForWeekday(day);  
+        const [h, m] = startTime.split(":");
+
+        const startTS = new Date(date);
+        startTS.setHours(h, m, 0, 0);
+
+        const endTS = new Date(startTS);
+        endTS.setHours(Number(h) + 1);          //1hr blocks
+
+        // console.log("Final start:", startTS.toISOString());
+        // console.log("Final end:", endTS.toISOString());
+
+        //insertion
+        await pool.query(`
+            INSERT INTO "PersonalSession" ("roomId", "trainerId", "memberId", "startTime", "endTime")
+            VALUES (0, $1, $2, $3, $4)
+        `, [
+            trainerId,
+            memberId,
+            startTS.toISOString(),
+            endTS.toISOString()
+        ]);
+
+    //    res.redirect("/booking?success=pt");
+    res.redirect("/booking");
+
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+});
+
+
+//group classes
+router.post("/booking/class", async (req, res) => {
+    const memberId = req.session.userId;
+    const { classId } = req.body;
+
+    try {
+        //checking capacity
+        const cap = await pool.query(`
+            SELECT 
+                "Room".capacity,
+                COUNT("ClassRegistration"."memberId") AS registered
+            FROM "ScheduledClass"
+            JOIN "Room" ON "ScheduledClass"."roomId" = "Room".id
+            LEFT JOIN "ClassRegistration" 
+                ON "ClassRegistration"."classId" = "ScheduledClass".id
+            WHERE "ScheduledClass".id = $1
+            GROUP BY "Room".capacity
+        `, [classId]);
+
+        const { capacity, registered } = cap.rows[0];
+        if (registered >= capacity) {
+            return res.send("Class is full.");
+        }
+
+        //prevention of adding duplicate registrations
+        await pool.query(`
+            INSERT INTO "ClassRegistration" ("classId", "memberId")
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+        `, [classId, memberId]);
+
+        // res.redirect("/booking?success=class");
+        res.redirect("/booking");
+
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+});
 
 //export the router so it can be mounted in the main app
 module.exports = router;

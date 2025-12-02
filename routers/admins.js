@@ -184,15 +184,15 @@ router.post("/classmanage/group", async (req, res) => {
 
   try {
 
-    // 1️⃣ Figure out weekday name (lowercase)
+    // figuring out weekday name (lowercase)
     const weekdayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
     const weekday = weekdayNames[new Date(startTime).getDay()]; // e.g. "monday"
 
-    // Extract only the HH:MM:SS portion (ignore GMT offset)
+    // extract only the HH:MM:SS portion (ignore GMT offset)
     const startTimeStr = new Date(startTime).toTimeString().split(" ")[0];
     const endTimeStr = new Date(endTime).toTimeString().split(" ")[0];
 
-    // 1️⃣ Validate trainer availability
+    // validate trainer availability
     const available = await pool.query(`
       SELECT 1
       FROM "Availability"
@@ -260,7 +260,7 @@ router.post("/classmanage/group", async (req, res) => {
   }
 });
 
-// Fetch trainer availability when selected
+// fetch trainer availability when selected
 router.get("/classmanage/group/availability", async (req, res) => {
   const { trainerId } = req.query;
   if (!trainerId) return res.status(400).send("Missing trainerId");

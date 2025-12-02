@@ -1,15 +1,32 @@
 {
-  "name": "nodepostgresproject",
+  "name": "comp3005-final",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+  "description": "Health and fitness club management system for COMP3005",
+  "homepage": "https://github.com/caled529/comp3005-final#readme",
+  "bugs": {
+    "url": "https://github.com/caled529/comp3005-final/issues"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caled529/comp3005-final.git"
+  },
+  "license": "BSD-3",
+  "author": "Ramona Caprariu, Cale Dillon, Olutomi Sami",
+  "type": "common",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "devDependencies": {
+    "@prisma/language-server": "^7.0.0",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-react": "^5.1.1",
+    "prettier": "^3.6.2",
+    "prisma": "^6.19.0",
+    "typescript": "^5.9.3",
+    "typescript-language-server": "^5.1.2",
+    "vite": "^7.2.4"
+  },
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

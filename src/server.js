@@ -22,10 +22,10 @@ app.use(express.json());
 app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (_, res) => res.render("welcome"));
-
+//PUBLIC ROUTES
+app.get("/", (req, res) => { res.render("homepage");});
 app.get("/login", (_, res) => res.render("login"));
 app.post('/login', login);
 app.get('/logout', logout);
@@ -33,13 +33,21 @@ app.get('/logout', logout);
 app.get("/register", (_, res) => res.render("register"));
 app.post("/register", registration);
 
-// app.get("/debug", (req, res) => {
-//   res.json(req.session);
-// });
+app.get('/logout', logout);
 
-//member dashboard
+//PROTECTED ROUTES
+//member
 app.get("/dashboard", requireLogin, (req, res) => {
-	res.render("member/dashboard", { name: req.session.name });
+    res.redirect("/member/dashboard");
+});
+app.get("/profile", requireLogin, (req, res) => {
+    res.redirect("/member/profile");
+});
+app.get("/booking", requireLogin, (req, res) => {
+     res.redirect("/member/booking");
+});
+app.get("/history", requireLogin, (req, res) => {
+    res.redirect("/member/history");
 });
 
 app.get("/trainer", requireRole("trainer"), (_, res) => res.render("headers/trainerheader"));
@@ -227,19 +235,11 @@ app.post("/trainer/availability", requireRole("trainer"), async (req, res) => {
 
 //mounting the role routers
 const memberRouter = require("./routers/members");
-// app.use("/", memberRouter);
 const trainerRouter = require("./routers/trainers");
-// app.use("/", trainerRouter);
 const adminRouter = require("./routers/admins");
-// app.use("/", adminRouter);
-app.use(requireRole("member"), memberRouter);
+app.use("/member", requireRole("member"), memberRouter);
 app.use(requireRole("trainer"), trainerRouter);
 app.use(requireRole("admin"), adminRouter);
-
-// app.get("/", (req, res) => {
-//   res.render('pages/index');
-// });
-
 
 //for the invalid routes
 app.use((req, res) => {

@@ -1,0 +1,47 @@
+extends ../layout
+
+block menu
+  include ../headers/memberheader
+
+block content
+  h1 Welcome #{name}
+  p This is your dashboard. Check out your upcoming bookings and goals' progress!
+
+  h2 Upcoming Personal Training Sessions
+  if ptSessions.length
+    ul
+      each s in ptSessions
+        li
+          - const d = new Date(s.startTime);
+          - const dow = d.toLocaleDateString("en-US", { weekday: "long" });
+          - const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+          | #{dow} at #{time} with Trainer #{s.trainername}
+  else
+    p No personal training sessions booked yet.
+
+  h2 Upcoming Group Classes
+  if classBookings.length
+    ul
+      each c in classBookings
+        li
+          - const d2 = new Date(c.startTime);
+          - const dow2 = d2.toLocaleDateString("en-US", { weekday: "long" });
+          - const time2 = d2.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+          | #{c.classname} → #{dow2} at #{time2} with #{c.trainername}
+  else
+    p No group class registrations yet.
+
+  h2 Goal Progress
+  if !activeGoal
+    p No active goals.
+  else if !mostRecMetric
+    p No health metrics logged yet.
+  else
+    h3 Active Goal: #{activeGoal.type} - target: #{activeGoal.target}
+
+    if progress
+      p Current: #{progress.current}
+      p Target: #{progress.target}
+      p Progress: #{progress.percent}%

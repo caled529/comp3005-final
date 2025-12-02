@@ -1,0 +1,116 @@
+extends ../../layout
+
+block menu
+  include ../../headers/adminheader
+
+block content
+  h1 Create Group Class
+
+  form(method="POST", action="/management/classmanage/group")
+    label(for="typeId") Class Type:
+    select(name="typeId", id="typeId", required)
+      option(value="") -- select type --
+      each t in classTypes
+        option(value=t.id)= t.name
+    br
+    br
+
+    label(for="trainerId") Trainer:
+    select(name="trainerId", id="trainerId", required)
+      option(value="") -- select trainer --
+      each tr in trainers
+        option(value=tr.userId)= tr.name
+    br
+    br
+
+    label(for="roomId") Room:
+    select(name="roomId", id="roomId", required)
+      option(value="") -- select room --
+      each r in rooms
+        option(value=r.id)= `Room ${r.id} (cap ${r.capacity})`
+    br
+    br
+
+    label(for="startTime") Start Time:
+    input(type="datetime-local", name="startTime", id="startTime", required)
+    br
+    br
+
+    label(for="endTime") End Time:
+    input(type="datetime-local", name="endTime", id="endTime", required)
+    br
+    br
+
+    button(type="submit") Save Group Class
+
+    // Availability display for the selected trainer (hidden until picked)
+    div#availabilityContainer(style="display:none; margin: 0.75rem 0;")
+      h4 Trainer Availability
+      table(border="1" cellpadding="6")
+        thead
+          tr
+            th Day
+            th Start
+            th End
+        tbody#availabilityBody
+
+
+  hr
+  a(href="/management/classmanage") ← Back to Class Management
+
+  // Inline JS — listens to the ONE trainer dropdown and fills the table
+  script.
+    (function () {
+      const select = document.getElementById('trainerId');
+      const container = document.getElementById('availabilityContainer');
+      const tbody = document.getElementById('availabilityBody');
+
+      function renderAvailability(rows) {
+        tbody.innerHTML = '';
+        rows.forEach(a => {
+          // support snake_case or camelCase from SQL/driver
+          const day = a.day;
+          const start = (a.starttime || a.startTime || '').toString();
+          const end = (a.endtime || a.endTime || '').toString();
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${day}</td>
+            <td>${start}</td>
+            <td>${end}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function loadAvailability(trainerId) {
+        if (!trainerId) {
+          container.style.display = 'none';
+          tbody.innerHTML = '';
+          return;
+        }
+        try {
+          const res = await fetch(`/management/classmanage/group/availability?trainerId=${encodeURIComponent(trainerId)}`);
+          const data = await res.json();
+          if (data && data.success && Array.isArray(data.availability)) {
+            renderAvailability(data.availability);
+            container.style.display = data.availability.length ? 'block' : 'none';
+          } else {
+            container.style.display = 'none';
+            tbody.innerHTML = '';
+          }
+        } catch (e) {
+          console.error(e);
+          container.style.display = 'none';
+          tbody.innerHTML = '';
+        }
+      }
+
+      // update on change of the ONE dropdown
+      select.addEventListener('change', (e) => {
+        loadAvailability(e.target.value);
+      });
+
+      // if page renders with a preselected trainer, load immediately
+      if (select.value) loadAvailability(select.value);
+    })();

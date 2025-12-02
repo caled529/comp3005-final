@@ -1,0 +1,122 @@
+extends ../layout
+
+block menu
+  include ../headers/adminheader
+
+block content
+  h1 Billing
+
+  // STEP 1: choose member
+  form#memberSelectForm(method="GET", action="/management/billing")
+    label(for="memberId") Select Member:
+    select(name="memberId" id="memberId" onchange="loadMemberData()")
+      option(value="") -- choose a member --
+      each m in membersList
+        option(value=m.userId)= m.name
+
+  hr
+
+  // STEP 2: display auto-loaded PT + Group data
+  h2 Usage Details
+  div#usageArea
+    p Select a member to load their attended classes.
+
+  hr
+
+  // STEP 3: Invoice table
+  h2 Invoice Line Items
+  table#invoiceTable(border="1" cellpadding="8")
+    thead
+      tr
+        th Description
+        th Amount ($)
+        th Remove
+    tbody#invoiceBody
+
+  button(type="button" onclick="addLineItem()") + Add Line Item
+
+  hr
+
+  h3 Total: $ 
+    span#totalAmount 0.00
+
+  // STEP 4: submit invoice
+  form#invoiceForm(method="POST", action="/management/billing/invoice")
+    input(type="hidden", name="memberId", id="invoiceMemberId")
+    input(type="hidden", name="items", id="invoiceItems")
+    button(type="button" onclick="submitInvoice()") Submit Invoice
+
+  script.
+    function loadMemberData() {
+      const id = document.getElementById("memberId").value;
+      document.getElementById("invoiceMemberId").value = id;
+
+      if (!id) return;
+
+      fetch(`/management/billing/data?memberId=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const area = document.getElementById('usageArea');
+          let html = "";
+
+          html += "<h3>Personal Training Sessions</h3>";
+          if (data.pt.length === 0) {
+            html += "<p>No Personal Training sessions.</p>";
+          } else {
+            html += "<ul>";
+            data.pt.forEach(s => {
+              html += `<li>PT with ${s.trainer} on ${new Date(s.startTime).toLocaleString()}</li>`;
+            });
+            html += "</ul>";
+          }
+
+          html += "<h3>Group Classes</h3>";
+          if (data.group.length === 0) {
+            html += "<p>No group classes.</p>";
+          } else {
+            html += "<ul>";
+            data.group.forEach(g => {
+              html += `<li>${g.type} with ${g.trainer} on ${new Date(g.startTime).toLocaleString()}</li>`;
+            });
+            html += "</ul>";
+          }
+
+          area.innerHTML = html;
+        });
+    }
+
+    function addLineItem() {
+      const body = document.getElementById("invoiceBody");
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td><input type="text" class="desc"></td>
+        <td><input type="number" class="amt" step="0.01" oninput="recalcTotal()"></td>
+        <td><button type="button" onclick="this.closest('tr').remove(); recalcTotal()">X</button></td>
+      `;
+
+      body.appendChild(row);
+    }
+
+    function recalcTotal() {
+      let total = 0;
+      document.querySelectorAll(".amt").forEach(a => {
+        const val = parseFloat(a.value);
+        if (!isNaN(val)) total += val;
+      });
+      document.getElementById("totalAmount").innerText = total.toFixed(2);
+    }
+
+    function submitInvoice() {
+      const items = [];
+      document.querySelectorAll("#invoiceBody tr").forEach(row => {
+        const desc = row.querySelector(".desc").value;
+        const amt = parseFloat(row.querySelector(".amt").value);
+        if (desc && !isNaN(amt)) {
+          items.push({ desc, amt });
+        }
+      });
+
+      document.getElementById("invoiceItems").value = JSON.stringify(items);
+      document.getElementById("invoiceForm").submit();
+    }

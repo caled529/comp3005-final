@@ -170,3 +170,20 @@ CREATE TABLE "ClassRegistration" (
   FOREIGN KEY ("memberId")
     REFERENCES "Member"("userId")
 );
+
+
+CREATE OR REPLACE FUNCTION set_active_goal()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE "Member"
+    SET "activeGoalId" = NEW.id
+    WHERE "userId" = NEW."memberId";
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER activate_latest_goal
+AFTER INSERT ON "Goal"
+FOR EACH ROW
+EXECUTE FUNCTION set_active_goal();
